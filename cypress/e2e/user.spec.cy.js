@@ -1,31 +1,34 @@
 import userData from '../fixtures/users/user-data.json'
+import LoginPage from '../pages/loginPage'
+import DashboardPage from '../pages/dashboardPage'
+import MenuPage from '../pages/menuPage'
+
+
+const loginPage = new LoginPage()
+const dashboardPage = new DashboardPage()
+const menuPage = new MenuPage()
 
 describe('Orange HRM Tests', () => {
 
   const selectorList = {
-    usernameField: "[name='username']",
-    passwordField: "[name= 'password']",
-    loginButton: "[type= 'submit']",
-    sectionTitleTopBar: ".oxd-topbar-header-breadcrumb-module",
-    dashboardGrid: ".orangehrm-dashboard-grid",
-    wrongcredentialAlert: "[role='alert']",
-    myInfoButton: '[href="/web/index.php/pim/viewMyDetails"]',
+   
     firstNameField: "[name='firstName']",
     lastNameField: "[name='lastName']",
     genericField: ".oxd-input--active",
     dateField: "[placeholder='yyyy-dd-mm']",
+    genericComboBox: ".oxd-select-text",
+    secondItemComboBox: ".oxd-select-dropdown > :nth-child(2)",
+    forthItemComboBox: ".oxd-select-dropdown > :nth-child(4)",
     dataCloseButton: ".--close",
-    submitButton: "[type='submit']",
+    submitButton: "[type='submit']"
+
   } 
 
   it.only('User Info Update - Success', () => {
-    cy.visit('/auth/login')
-    cy.get(selectorList.usernameField).type(userData.userSucess.username)
-    cy.get(selectorList.passwordField).type(userData.userSucess.password)
-    cy.get(selectorList.loginButton).click()
-    cy.location('pathname').should('equal' , '/web/index.php/dashboard/index')
-    cy.get(selectorList.dashboardGrid)
-    cy.get(selectorList.myInfoButton).click()
+    loginPage.accessLoginPage()
+    loginPage.loginWithUser(userData.userSucess.username, userData.userSucess.password)
+    dashboardPage.checkdashboardPage()
+    menuPage.accessMyInfo()
     cy.get(selectorList.firstNameField).clear().type('FirstNameTest')
     cy.get(selectorList.lastNameField).clear().type('LastNameTest')
     cy.get(selectorList.genericField).eq(3).clear().type('EmpIdTest')
@@ -35,7 +38,14 @@ describe('Orange HRM Tests', () => {
     cy.get(selectorList.dataCloseButton).click()
     cy.get(selectorList.submitButton).eq(0).click()
     cy.get('body').should('contain', 'Successfully Updated')
+    cy.get(selectorList.genericComboBox).eq(0).click({ force: true })
+    cy.get(selectorList.secondItemComboBox).click()
+    cy.get(selectorList.genericComboBox).eq(1).click({ force: true })
+    cy.get(selectorList.forthItemComboBox).click()
+    menuPage.accessPerformance()
+
   })
+  
   it('Login - Fail', () => {
     cy.visit('/auth/login')
     cy.get(selectorList.usernameField).type(userData.userFail.username)
